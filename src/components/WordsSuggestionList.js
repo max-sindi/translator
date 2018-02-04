@@ -1,17 +1,36 @@
 import React, { Component } from 'react';
-import { InputRadio } from './InputRadio';
+import WordsSuggestionItem from './WordsSuggestionItem'
 
-export default class WordsSuggestionList extends Component {
+export class WordsSuggestionList extends Component {
+  // componentDidUpdate() {
+  //   if(this.props.needFocus) {
+  //     this.list.focus();
+  //   }
+  // }
+
   render() {
-    return (
-      <li className="suggestion-list__list-item">
-        <InputRadio value={this.props.value} />
-        <div className="suggestion-list__text-container">
-         {this.props.item}
-        </div>
+    // attention! need refactor
+    function parseKey(item) {
+      return item.trim().split(' ')[0];
+    }
 
-      </li>
+    // attention! need refactor
+    const listItems = this.props.words.map( (item, index) =>
+      <WordsSuggestionItem item={item}
+                           key={ parseKey(item) }
+                           value={ parseKey(item) }
+                           requireWord={this.props.requireWord}
+                           number={index}
+                           needFocus={this.props.needFocus}
+      />
+    );
+
+    return (
+      <ul
+        className="words-suggestion__list"
+      >
+        { listItems }
+      </ul>
     );
   }
 }
-

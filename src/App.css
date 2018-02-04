@@ -1,3 +1,8 @@
+body {
+  /*background-color: rgba(95,186,125,0.9);*/
+  background-color: rgba(16,138,236,0.7);
+}
+
 .page-wrapper {
   display: flex;
 }
@@ -28,4 +33,8 @@
 
 .suggestion-list__radio-input:focus + .suggestion-list__text-container {
   background-color: olive;
+}
+
+.words-suggestion__list:focus {
+  background-color: red;
 }

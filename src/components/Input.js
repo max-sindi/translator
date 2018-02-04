@@ -1,31 +1,35 @@
 import React, { Component } from 'react';
-import {WordsSuggestions} from './WordsSuggestions'
+import {WordsSuggestionList} from './WordsSuggestionList';
+import { InputMain } from './InputMain';
 
 export class Input extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      inputValue: '',
+      suggestedListFocus: false,
     }
   }
 
-  changeHandler = (e) => {
-    const value = e.target.value;
-
+  inputBlurHandler = () => {
     this.setState({
-      inputValue: value
+      suggestedListFocus: true
     });
-
-    this.props.inputChange(value);
   }
 
   render() {
     return (
       <div className="input__wrapper">
-        <input type="text"
-               value={this.state.inputValue}
-               onChange={this.changeHandler } />
-        <WordsSuggestions words={this.props.words}/>
+        <InputMain
+          inputChange={this.props.inputChange}
+          value={this.props.value}
+          requireWord={this.props.requireWord}
+          onInputBlur={this.inputBlurHandler}
+        />
+        <WordsSuggestionList
+          words={this.props.words}
+          requireWord={this.props.requireWord}
+          needFocus={this.state.suggestedListFocus}
+        />
       </div>
     );
   }

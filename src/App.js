@@ -5,6 +5,7 @@ import { Main } from './components/Main';
 import { Input } from './components/Input';
 
 import wordsSorted from './components/words-store';
+import config from './config'
 
 
 
@@ -12,294 +13,235 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      wordsHistiry: [],
+      translateHistory: [],
       suggestedWordsArray: [],
       wordInInput: '',
-      wordTranslated: ''
+      wordTranslated: '',
+      firstLetter: '',
+      translate: '',
+      trimmedValue: '',
     }
   }
 
+  // attention! need think about move major part of this in Input component
   inputChangeHandler = (value) => {
-    const firstLetter = value[0],
-          letterObject = wordsSorted[firstLetter],
-          regSearch = new RegExp(value, 'i'),
-          arrayOfAllResults = [],
-          maxSuggestedResults = 10;
+    const trimmedValue = extractEnglishLetters(value);
+    let suggestedWordsArray = [],
+        firstLetter;
 
-    let suggestedWordsArray = [];
+    if( !trimmedValue ) {
+      this.setState({
+        firstLetter: '',
+        suggestedWordsArray,
+      });
 
-    fillArrayWidthAllResults();
-
-    if(arrayOfAllResults.length > maxSuggestedResults) {
-      fillWithRundomMatchedValues();
-    } else {
-      suggestedWordsArray = arrayOfAllResults;
+      return;
     }
 
+    firstLetter = trimmedValue[0];
+
+    fillSuggestedArray();
 
     this.setState({
-      suggestedWordsArray
+      suggestedWordsArray,
+      firstLetter,
+      trimmedValue
     })
 
-    /*
-      fillFullArray function runs through the letterObject and detect which of
-      existing words are matching to the value.
-      arrayOfAllResults will be filling with matched values;
-    */
-    function fillArrayWidthAllResults() {
-      for(let key in letterObject) {
+    function fillSuggestedArray() {
+      const letterObject = wordsSorted[firstLetter],
+            // search match only in start of potential word
+            regSearch = new RegExp('\\b' + trimmedValue),
+            maxSuggestedResults = config.maxSuggestedResults,
+            arrayOfAllResults = [];
 
-        if( key.search(regSearch) !== -1) {
-          const str = key + ' - ' + letterObject[key];
-          arrayOfAllResults.push( str );
+      fillArrayWidthAllResults();
+
+      if(arrayOfAllResults.length > maxSuggestedResults) {
+        fillArrayWithRundomResults();
+      } else {
+        suggestedWordsArray = arrayOfAllResults;
+      }
+
+      /*
+        fillFullArray function runs through the letterObject and detect which of
+        existing words are matching to the required value.
+        arrayOfAllResults will be filling with matched values;
+      */
+      function fillArrayWidthAllResults() {
+        const arr = arrayOfAllResults;
+
+        for(let key in letterObject) {
+
+          if( key.search(regSearch) !== -1) {
+            const str = key + ' - ' + letterObject[key];
+            arr.push( str );
+          }
+
         }
+      }
 
+      /*
+        fillWithRundomMatchedValues function get the $maxSuggestedResults random
+        results and put them into $suggestedWordsArray.
+      */
+      function fillArrayWithRundomResults() {
+        const workArray = suggestedWordsArray,
+              resultsArray = arrayOfAllResults,
+              fullLenth = resultsArray.length,
+              max = maxSuggestedResults,
+              resultsNumbers = {};
+
+        for(let i = 0; i < max; i++) {
+          const random = Math.floor( (Math.random() * (fullLenth-1) ) + 1);
+
+          if(i === 0) {
+            workArray.push( resultsArray[0] );
+            continue;
+          }
+
+          if( !resultsNumbers[random] ) {
+            workArray.push( resultsArray[random] );
+            resultsNumbers[random] = true;
+          } else {
+            i--;
+          }
+
+        }
       }
     }
 
-    /*
-      fillWithRundomMatchedValues function get the $maxSuggestedResults random
-      results and put them into $suggestedWordsArray.
-    */
-    function fillWithRundomMatchedValues() {
-      const workArray = suggestedWordsArray,
-            resultsArray = arrayOfAllResults,
-            fullLenth = resultsArray.length,
-            max = maxSuggestedResults,
-            resultsNumbers = {};
+    function extractEnglishLetters(val) {
+      let newValue = val.toLowerCase().match(/[a-z]/g);
 
-      for(let i = 0; i < max; i++) {
-        const random = Math.floor( Math.random() * fullLenth );
-
-        if( !resultsNumbers[random] ) {
-          workArray.push( resultsArray[random] );
-          resultsNumbers[random] = true;
-        } else {
-          i--;
-          console.log('random is repeated');
-        }
-
+      if( newValue ) {
+        return newValue.join('');
+      } else {
+        return '';
       }
     }
+  }
+
+  requireWord = (word) => {
+    // if nothing was typed
+    if(!word) {
+      return;
+    }
+
+    const { firstLetter } = this.state;
+    let translate;
+
+    if(wordsSorted[firstLetter]) {
+      translate = wordsSorted[firstLetter][word];
+
+      // if translate was founded -> put it in translate history
+      if(translate) {
+       addWordToHistory(this, word, translate);
+      }
+
+    } else {
+      translate = 'Нет совпадений';
+    }
+
+    this.setState({
+      wordTranslated: word,
+      translate,
+    });
+
+    function addWordToHistory(that, word, translate) {
+      const newTranslateHistory = that.state.translateHistory.concat();
+
+      /*
+       if any word repeats, the oldest one removes, that's why $translateHistory
+       consist of only unique words
+      */
+      newTranslateHistory.forEach( (item, index, arr) => {
+        if( item.word === word ) {
+          arr.splice(index, 1);
+        }
+      })
+
+      newTranslateHistory.push({word, translate});
+      that.setState({
+        translateHistory: newTranslateHistory
+      })
+    }
+  }
+
+  requireWordFromHistory = (word) => {
+    const firstLetter = word[0],
+          translate = wordsSorted[firstLetter][word];
+
+    this.setState({
+      wordTranslated: word,
+      translate,
+    })
+  }
+
+  deleteFromTranslateHistory = (placeInArray) => {
+    const newTranslateHistory = this.state.translateHistory.concat();
+    // delete item
+    newTranslateHistory.splice(placeInArray, 1);
+
+    this.setState({
+      translateHistory: newTranslateHistory
+    });
   }
 
   render() {
+    const state = this.state,
+          { firstLetter, wordTranslated } = state;
+
+    let translate;
+
+    // if input is clear, it views previous result or says to type something
+    if( firstLetter.search(/\w/) === -1 ) {
+
+      if(wordTranslated) {
+        translate = defineTranslation();
+      } else {
+        translate = 'Вы ничего не написали';
+      }
+
+    } else {
+      translate = defineTranslation();
+    }
+
+    function defineTranslation() {
+      let translate = state.translate;
+
+      if(state.translate === '') {
+        translate = 'Выберите слово';
+      } else if(!translate) {
+        translate = 'Перевод не найден';
+      }
+
+      return translate;
+    }
+
     return (
       <div className="page-wrapper">
-        <History />
+        <History
+          history={ this.state.translateHistory }
+          requireWordFromHistory={this.requireWordFromHistory}
+          deleteFromTranslateHistory={this.deleteFromTranslateHistory}
+        />
         <div className="main-wrapper">
-          <Main />
-          <Input inputChange={ this.inputChangeHandler }
-                 words={this.state.suggestedWordsArray}  />
+          <Input
+            inputChange={ this.inputChangeHandler }
+            words={this.state.suggestedWordsArray}
+            requireWord={this.requireWord}
+          />
+          <Main
+            wordTranslated={wordTranslated}
+            translate={translate}
+          />
         </div>
       </div>
     )
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// class NewsItem extends Component {
-//   constructor(props) {
-//     super(props);
-//     this.state = {
-//       hidden: true
-//     };
-//   }
-
-//   clickHandler = () => {
-//     this.setState({
-//       hidden: !this.state.hidden
-//     })
-//   }
-
-//   render() {
-//     let author = this.props.data.author,
-//         comment = this.props.data.text,
-//         hidden  = this.state.hidden;
-//     console.dir(this);
-
-//     return (
-//       <div className="news-item">
-//         <button onClick={this.clickHandler}>click to show</button>
-//         { author } : <br/>
-//         <div className={'comment ' + (hidden ? 'hidden' : '')}>
-//           { comment ? comment : "Комменатрий пустооооой"}
-//         </div>
-//       </div>
-//     )
-//   }
-// }
-
-
-// class News extends Component {
-//   render() {
-
-//     // loop
-//     const news = this.props.data.map((item, index) => {
-//       return (
-//         <NewsItem data={item} key={index} />
-//       )
-//     });
-
-//     return (
-//       <div className="news">
-//         {news} {/* set of NewsItem components*/}
-//       </div>
-//     )
-//   }
-// }
-
-
-// class Checkbox extends Component {
-
-//   changeHandler = (e) => {
-//     this.props.checkHandler(e.target);
-//   }
-
-//   render() {
-//     return (
-//       <input type="checkbox" onChange={this.changeHandler}/>
-//     )
-//   }
-// }
-
-
-// class SendButton extends Component {
-//   constructor(props) {
-//     super(props);
-//     this.state = {
-//       full: this.props.full
-//     };
-//   }
-
-//   render() {
-//     return (
-//       <button className={'button ' + (this.state.full ? 'full' : '')}>
-//         Send
-//       </button>
-//     )
-//   }
-// }
-
-
-// class Form extends Component {
-//   constructor(props) {
-//     super(props);
-
-//     this.state = {
-//       full: false
-//     };
-
-//     this.full = {
-//       input1: false,
-//       input2: false,
-//       checkbox: false
-//     }
-//   }
-
-
-//   inputChangeHandler = (target, targetName) => {
-//     let inputIsFilled = !!target.value;
-
-//     // if status is not changed, don't do anything
-//     if( this.full[targetName] === inputIsFilled) {
-//       return;
-//     }
-
-//     this.full[targetName] = inputIsFilled;
-//     this.isFilledAll();
-//   }
-
-//   checkboxHandler = (target) => {
-//     this.full.checkbox = target.checked;
-
-//     if(this.full.checkbox) {
-//       this.isFilledAll();
-//     }
-//   }
-
-//   isFilledAll = () => {
-//     console.log(this.full); // delete
-
-//     for(let key in this.full) {
-//       if( !this.full[key] ) return false; // if anyone == false -> return
-//     }
-
-//     this.setState({
-//       full: true
-//     });
-
-//     console.log('zapolneno'); // delete
-//   }
-
-//   render() {
-//     console.log('рендеред');
-//     return (
-//       <div>
-//         <Input name="input1" changeHandler={this.inputChangeHandler}/>
-//         <Input name="input2" changeHandler={this.inputChangeHandler}/>
-//         <Checkbox checkHandler={this.checkboxHandler}/>
-//         <SendButton full={this.state.full}/>
-//       </div>
-//     )
-//   }
-// }
-
-// class Input extends Component {
-//   constructor(props) {
-//     super(props);
-//   }
-
-//   changeHandler = (e) => {
-
-//     const
-//       inputRef = this.props.name,
-//       input    = ReactDOM.findDOMNode( this.refs[inputRef] );
-
-//     this.props.changeHandler(input, inputRef);
-//   }
-
-//   render() {
-//     let name = this.props.name;
-
-//     return (
-//       <input name={name}
-//              onChange={this.changeHandler}
-//              defaultValue=""
-//              ref={name} />
-//     )
-//   }
-// }
-
-
-// class Template extends Component {
-//   constructor(props) {
-//     super(props);
-//     this.state = {};
-//   }
-
-//   render() {
-//     return (
-//       <input/>
-//     )
-//   }
-// }
 
 export default App;
 
