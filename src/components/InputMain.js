@@ -26,12 +26,14 @@ export class InputMain extends Component {
     this.props.requireWord(this.state.inputValue);
   }
 
+  // set focus to list
   keyupHandler = (e) => {
     if(e.key !== 'ArrowDown') {
       return;
     }
 
     this.props.onInputBlur();
+    console.log("arrow down");
   }
 
   render() {

@@ -2,11 +2,6 @@ import React, { Component } from 'react';
 import WordsSuggestionItem from './WordsSuggestionItem'
 
 export class WordsSuggestionList extends Component {
-  // componentDidUpdate() {
-  //   if(this.props.needFocus) {
-  //     this.list.focus();
-  //   }
-  // }
 
   render() {
     // attention! need refactor
@@ -21,7 +16,7 @@ export class WordsSuggestionList extends Component {
                            value={ parseKey(item) }
                            requireWord={this.props.requireWord}
                            number={index}
-                           needFocus={this.props.needFocus}
+                           listFocus={this.props.listFocus}
       />
     );
 

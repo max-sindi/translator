@@ -6,13 +6,15 @@ export class Input extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      suggestedListFocus: false,
+      listFocus: false,
+      inputFocus: false,
     }
   }
 
   inputBlurHandler = () => {
     this.setState({
-      suggestedListFocus: true
+      listFocus: true,
+      inputFocus: false,
     });
   }
 
@@ -23,12 +25,12 @@ export class Input extends Component {
           inputChange={this.props.inputChange}
           value={this.props.value}
           requireWord={this.props.requireWord}
-          onInputBlur={this.inputBlurHandler}
+          onInputBlur={this.inputBlurHandler.bind(this)}
         />
         <WordsSuggestionList
           words={this.props.words}
           requireWord={this.props.requireWord}
-          needFocus={this.state.suggestedListFocus}
+          listFocus={this.state.listFocus}
         />
       </div>
     );
