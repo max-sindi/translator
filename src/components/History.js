@@ -27,6 +27,7 @@ export class History extends Component {
 
     return (
       <div className="history__wrapper">
+        <h2 children={'История переводов'} />
         <ul>
           { history }
         </ul>

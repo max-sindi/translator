@@ -226,17 +226,15 @@ class App extends Component {
           requireWordFromHistory={this.requireWordFromHistory}
           deleteFromTranslateHistory={this.deleteFromTranslateHistory}
         />
-        <div className="main-wrapper">
-          <Input
-            inputChange={ this.inputChangeHandler }
-            words={this.state.suggestedWordsArray}
-            requireWord={this.requireWord}
-          />
-          <Main
-            wordTranslated={wordTranslated}
-            translate={translate}
-          />
-        </div>
+        <Input
+          inputChange={ this.inputChangeHandler }
+          words={this.state.suggestedWordsArray}
+          requireWord={this.requireWord}
+        />
+        <Main
+          wordTranslated={wordTranslated}
+          translate={translate}
+        />
       </div>
     )
   }

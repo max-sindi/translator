@@ -26,25 +26,47 @@ export class InputMain extends Component {
     this.props.requireWord(this.state.inputValue);
   }
 
+  componentWillUpdate() {
+    // debugger;
+
+  }
+
+  componentDidUpdate() {
+    if(this.props.isInputFocus) {
+      console.log(11);
+      setTimeout( () => {
+        this.input.focus();
+      }, 1);
+    }
+  }
+
   // set focus to list
-  keyupHandler = (e) => {
-    if(e.key !== 'ArrowDown') {
+  keyDownHandler = (e) => {
+    const key = e.key;
+
+    if(key !== 'ArrowDown') {
       return;
     }
-
-    this.props.onInputBlur();
-    console.log("arrow down");
+    // console.log('input keyed');
+    this.props.listFocus();
   }
+
+  // blurHandler = () => {
+  //   this.props.inputBlur();
+  // }
 
   render() {
     return (
       <input
          type="text"
+         id="aaa"
          autoFocus
          value={this.state.inputValue}
          onKeyPress={this.keypressHandler}
-         onKeyUp={this.keyupHandler}
+         onKeyDown={this.keyDownHandler}
          onChange={this.changeHandler}
+         onBlur={this.blurHandler}
+         ref={ (input) => {this.input = input} }
       />
     );
   }

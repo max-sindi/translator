@@ -9,23 +9,26 @@ export class WordsSuggestionList extends Component {
       return item.trim().split(' ')[0];
     }
 
+    const {props, words = props.words} = this;
+
     // attention! need refactor
-    const listItems = this.props.words.map( (item, index) =>
+    const listItems = words.map( (item, index) =>
       <WordsSuggestionItem item={item}
+                           number={index}
+                           length={words.length}
                            key={ parseKey(item) }
                            value={ parseKey(item) }
-                           requireWord={this.props.requireWord}
-                           number={index}
-                           listFocus={this.props.listFocus}
+                           requireWord={props.requireWord}
+                           isListFocus={props.isListFocus}
+                           inputFocus={props.inputFocus}
       />
     );
 
     return (
       <ul
         className="words-suggestion__list"
-      >
-        { listItems }
-      </ul>
+        children={listItems}
+      />
     );
   }
 }

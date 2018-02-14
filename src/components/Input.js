@@ -6,15 +6,35 @@ export class Input extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      listFocus: false,
-      inputFocus: false,
+      isListFocus: false,
+      isInputFocus: false,
     }
   }
 
-  inputBlurHandler = () => {
+  // inputBlurHandler = () => {
+  //   this.setState( () => ({
+  //     isInputFocus: false,
+  //   }));
+  // }
+
+  inputFocus = () => {
+    // console.log('input focused');
+    this.setState( () => ({
+      isListFocus: false,
+      isInputFocus: true,
+    }));
+  }
+
+  // inputBlur = () => {
+  //   this.setState( () => ({
+  //     isInputFocus: false,
+  //   }), function(){console.log(111);});
+  // }
+
+  listFocus = () => {
     this.setState({
-      listFocus: true,
-      inputFocus: false,
+      isInputFocus: false,
+      isListFocus: true,
     });
   }
 
@@ -25,12 +45,16 @@ export class Input extends Component {
           inputChange={this.props.inputChange}
           value={this.props.value}
           requireWord={this.props.requireWord}
-          onInputBlur={this.inputBlurHandler.bind(this)}
+          // onInputBlur={this.inputBlurHandler.bind(this)}
+          isInputFocus={this.state.isInputFocus}
+          // inputBlur={this.inputBlur}
+          listFocus={this.listFocus}
         />
         <WordsSuggestionList
           words={this.props.words}
           requireWord={this.props.requireWord}
-          listFocus={this.state.listFocus}
+          isListFocus={this.state.isListFocus}
+          inputFocus={this.inputFocus}
         />
       </div>
     );
