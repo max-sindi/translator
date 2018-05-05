@@ -6,7 +6,12 @@ import { Input } from './components/Input';
 
 import wordsSorted from './components/words-store';
 import config from './config'
+import axios from 'axios';
 
+axios.get('/translate')
+  .then((data) => {
+    console.log(data);
+  })
 
 
 class App extends Component {
@@ -242,4 +247,3 @@ class App extends Component {
 
 
 export default App;
-
